@@ -49,9 +49,22 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/chats', require('./routes/chatRoutes'));
 
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+// Serve Static Frontend in Production
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res) => {
+    // If request starts with /api, don't serve index.html (let it 404 later or handle here)
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.resolve(clientDistPath, 'index.html'));
+    }
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
