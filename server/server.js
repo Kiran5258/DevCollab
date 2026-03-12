@@ -54,11 +54,11 @@ if (process.env.NODE_ENV === 'production') {
   const clientDistPath = path.join(__dirname, '../client/dist');
   app.use(express.static(clientDistPath));
 
-  app.get('*', (req, res) => {
-    // If request starts with /api, don't serve index.html (let it 404 later or handle here)
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.resolve(clientDistPath, 'index.html'));
+  app.get('(.*)', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
     }
+    res.sendFile(path.resolve(clientDistPath, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
