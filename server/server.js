@@ -54,10 +54,7 @@ if (process.env.NODE_ENV === 'production') {
   const clientDistPath = path.join(__dirname, '../client/dist');
   app.use(express.static(clientDistPath));
 
-  app.get('/:path*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
+  app.get(/^\/(?!api).*/, (req, res) => {
     res.sendFile(path.resolve(clientDistPath, 'index.html'));
   });
 } else {
