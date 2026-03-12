@@ -51,11 +51,12 @@ app.use('/api/chats', require('./routes/chatRoutes'));
 
 // Serve Static Frontend in Production
 if (process.env.NODE_ENV === 'production') {
-  const clientDistPath = path.join(__dirname, '../client/dist');
+  const clientDistPath = path.resolve(__dirname, '..', 'client', 'dist');
+  console.log('Serving static files from:', clientDistPath);
   app.use(express.static(clientDistPath));
 
   app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.resolve(clientDistPath, 'index.html'));
+    res.sendFile(path.join(clientDistPath, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
