@@ -1,0 +1,43 @@
+services:
+  # Frontend Static Site
+  - type: static
+    name: devcollab-frontend
+    env: static
+    buildCommand: cd client && npm install && npm run build
+    publishPath: client/dist
+    # This route fixes the "Not Found" issue for React Router paths like /verify-email
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://devcollab-backend-ejgi.onrender.com/api # Your Backend URL
+
+  # Backend Web Service
+  - type: web
+    name: devcollab-backend
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: CLIENT_URL
+        value: https://devcollab-99ud.onrender.com # UPDATE THIS to your actual Frontend URL
+      - key: GOOGLE_CALLBACK_URL
+        value: https://devcollab-backend-ejgi.onrender.com/api/auth/google/callback
+      - key: GITHUB_CALLBACK_URL
+        value: https://devcollab-backend-ejgi.onrender.com/api/auth/github/callback
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set this in the Render dashboard or connect a database
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: MAILJET_API_KEY
+        sync: false
+      - key: MAILJET_SECRET_KEY
+        sync: false
