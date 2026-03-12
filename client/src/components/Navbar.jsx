@@ -25,7 +25,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="p-2.5 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-indigo-500/20">
-                <Code2 className="text-white w-6 h-6" />
+                <img src="/favicon.png" alt="DevCollab" className="w-6 h-6 object-contain" />
               </div>
               <span className="text-2xl font-black tracking-tighter gradient-text">DevCollab</span>
             </Link>

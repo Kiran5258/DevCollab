@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-6">
               <div className="bg-primary-600 p-2 rounded-xl">
-                <Code2 className="text-white" size={24} />
+                <img src="/favicon.png" alt="DevCollab" className="w-6 h-6 object-contain" />
               </div>
               <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
                 DevCollab
