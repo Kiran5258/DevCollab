@@ -29,7 +29,8 @@ const OAuthSuccess = () => {
           };
 
           localStorage.setItem('user', JSON.stringify(userData));
-          window.location.href = '/dashboard'; // Hard refresh to update state
+          navigate('/dashboard');
+          window.location.reload(); // Refresh to update auth state
         } catch (error) {
           console.error('OAuth Error:', error);
           navigate('/login');

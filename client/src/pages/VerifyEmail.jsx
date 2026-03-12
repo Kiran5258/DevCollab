@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import API from '../services/api';
@@ -8,6 +8,7 @@ const VerifyEmail = () => {
   const [status, setStatus] = useState('loading'); // loading, success, error
   const [message, setMessage] = useState('');
   const { token } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verify = async () => {
@@ -20,7 +21,8 @@ const VerifyEmail = () => {
         if (res.data.token) {
           localStorage.setItem('user', JSON.stringify(res.data));
           setTimeout(() => {
-            window.location.href = '/dashboard';
+            navigate('/dashboard');
+            window.location.reload();
           }, 2000);
         }
       } catch (err) {
