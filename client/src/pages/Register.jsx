@@ -45,21 +45,27 @@ const Register = () => {
     }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert('Passwords do not match');
-    } else {
-      const userData = { name, email, password };
-      dispatch(register(userData));
+      return;
+    }
+
+    try {
+      // Use local backend registration
+      dispatch(register({ name, email, password }));
+    } catch (error) {
+      console.error('Registration Error:', error);
+      alert(error.message);
     }
   };
 
   if (isRegistered) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center p-4 text-center">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }} 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass-card p-12 rounded-3xl max-w-lg"
         >
@@ -68,7 +74,7 @@ const Register = () => {
           </div>
           <h2 className="text-3xl font-bold mb-4">Check your Email</h2>
           <p className="text-slate-600 dark:text-slate-400 mb-8">
-            We've sent a verification link to <span className="font-bold text-slate-800 dark:text-white">{email}</span>. 
+            We've sent a verification link to <span className="font-bold text-slate-800 dark:text-white">{email}</span>.
             Please verify your account to continue.
           </p>
           <Link to="/login" className="btn-primary inline-block">

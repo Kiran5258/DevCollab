@@ -35,6 +35,20 @@ export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) =
   }
 });
 
+// Firebase login
+export const firebaseLogin = createAsyncThunk('auth/firebaseLogin', async (firebaseToken, thunkAPI) => {
+  try {
+    const response = await axios.post(API_URL + 'firebase', { token: firebaseToken });
+    if (response.data) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || error.toString();
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
 // Logout user
 export const logout = createAsyncThunk('auth/logout', async () => {
   localStorage.removeItem('user');
@@ -79,6 +93,20 @@ export const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(login.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        state.user = null;
+      })
+      .addCase(firebaseLogin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(firebaseLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.user = action.payload;
+      })
+      .addCase(firebaseLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

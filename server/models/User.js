@@ -18,11 +18,12 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function() {
-      return !this.googleId && !this.githubId;
+      return !this.firebaseId && !this.googleId && !this.githubId;
     },
     minlength: 6,
     select: false,
   },
+  firebaseId: String,
   googleId: String,
   githubId: String,
   role: {

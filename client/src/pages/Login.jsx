@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { login, reset } from '../redux/slices/authSlice';
+import { login, firebaseLogin, reset } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, Github, Chrome, Eye, EyeOff } from 'lucide-react';
+import { auth, googleProvider, githubProvider } from '../config/firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -72,10 +74,24 @@ const Login = () => {
     }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const userData = { email, password };
-    dispatch(login(userData));
+    try {
+      dispatch(login({ email, password }));
+    } catch (error) {
+      console.error('Login Error:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleSocialLogin = async (provider) => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const token = await result.user.getIdToken();
+      dispatch(firebaseLogin(token));
+    } catch (error) {
+      console.error('Firebase Auth Error:', error);
+    }
   };
 
   return (
@@ -167,20 +183,22 @@ const Login = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <a 
-              href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`}
+            <button 
+              type="button"
+              onClick={() => handleSocialLogin(googleProvider)}
               className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <Chrome size={20} className="text-blue-500" />
               <span>Google</span>
-            </a>
-            <a 
-              href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/github`}
+            </button>
+            <button 
+              type="button"
+              onClick={() => handleSocialLogin(githubProvider)}
               className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
             >
               <Github size={20} />
               <span>GitHub</span>
-            </a>
+            </button>
           </div>
 
           <p className="mt-8 text-center text-slate-600 dark:text-slate-400">

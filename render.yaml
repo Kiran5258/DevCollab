@@ -33,4 +33,31 @@ services:
         sync: false
       - key: MAILJET_SECRET_KEY
         sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      # Frontend Firebase Config (Needed at build time)
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+      - key: VITE_FIREBASE_MEASUREMENT_ID
+        sync: false
 

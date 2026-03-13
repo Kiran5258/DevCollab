@@ -197,3 +197,45 @@ exports.resetPassword = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Firebase Auth (Create/Login user)
+// @route   POST /api/auth/firebase
+// @access  Public
+exports.firebaseAuth = async (req, res, next) => {
+  try {
+    const { firebaseUser } = req; // From middleware
+    
+    let user = await User.findOne({ 
+      $or: [
+        { firebaseId: firebaseUser.uid },
+        { email: firebaseUser.email }
+      ] 
+    });
+
+    if (user) {
+      if (!user.firebaseId) {
+        user.firebaseId = firebaseUser.uid;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name: firebaseUser.name || firebaseUser.email.split('@')[0],
+        email: firebaseUser.email,
+        firebaseId: firebaseUser.uid,
+        isVerified: !!firebaseUser.email_verified,
+        profileImage: firebaseUser.picture || undefined
+      });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profileImage: user.profileImage,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};

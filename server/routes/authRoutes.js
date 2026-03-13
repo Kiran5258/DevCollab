@@ -5,8 +5,10 @@ const {
   verifyEmail,
   forgotPassword,
   resetPassword,
+  firebaseAuth,
 } = require('../controllers/authController');
 
+const { verifyFirebaseToken } = require('../middleware/firebaseAuth');
 const passport = require('passport');
 const generateToken = require('../utils/generateToken');
 
@@ -14,6 +16,7 @@ const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/firebase', verifyFirebaseToken, firebaseAuth);
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', resetPassword);
