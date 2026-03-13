@@ -9,7 +9,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: CLIENT_URL
-        value: https://devcollab-app.onrender.com # Update this after first deployment
+        value: https://devcollab-99ud.onrender.com
+      - key: SERVER_URL
+        value: https://devcollab-99ud.onrender.com
       - key: VITE_API_URL
         value: https://devcollab-app.onrender.com/api
       - key: GOOGLE_CALLBACK_URL

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login, firebaseLogin, reset } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
-import { Mail, Lock, LogIn, Github, Chrome, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, Github, Chrome, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { auth, googleProvider, githubProvider } from '../config/firebase';
 import { signInWithPopup } from 'firebase/auth';
 
@@ -24,6 +24,7 @@ const Login = () => {
   );
 
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [justVerified, setJustVerified] = useState(false);
 
   useEffect(() => {
     if (isError) {
@@ -31,6 +32,14 @@ const Login = () => {
         setNeedsVerification(true);
       }
       console.error(message);
+    }
+
+    // Check for verified query param
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+      setJustVerified(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     if (isSuccess || user) {
@@ -107,6 +116,17 @@ const Login = () => {
             <h2 className="text-3xl font-bold mb-2">Welcome Back</h2>
             <p className="text-slate-600 dark:text-slate-400">Continue your journey with us</p>
           </div>
+
+          {justVerified && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-2xl flex items-center gap-3 text-green-600 dark:text-green-400"
+            >
+              <CheckCircle size={20} />
+              <span className="text-sm font-medium">Email verified successfully! You can now log in.</span>
+            </motion.div>
+          )}
 
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">

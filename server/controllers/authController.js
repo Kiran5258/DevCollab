@@ -33,19 +33,17 @@ exports.register = async (req, res, next) => {
     if (user) {
       const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
-      const message = `Your verification code is: ${verificationOTP}. Alternatively, you can verify your email by clicking: ${verificationUrl}`;
+      const message = `Your verification code for DevCollab is: ${verificationOTP}`;
       const html = `
-        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h1 style="color: #4F46E5; text-align: center;">Verify Your Email</h1>
-          <p>Thank you for joining DevCollab! Use the code below to verify your account:</p>
-          <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; margin: 20px 0;">
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; text-align: center;">
+          <h1 style="color: #4F46E5;">Verify Your Email</h1>
+          <p style="color: #4B5563; font-size: 16px;">Thank you for joining DevCollab! Use the verification code below to confirm your account:</p>
+          <div style="background: #F3F4F6; padding: 20px; border-radius: 12px; display: inline-block; font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #111827; margin: 20px 0; min-width: 200px;">
             ${verificationOTP}
           </div>
-          <p>Or click the link below:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Verify Email</a>
-          </div>
-          <p style="color: #6B7280; font-size: 14px; text-align: center;">This code will expire in 30 minutes.</p>
+          <p style="color: #6B7280; font-size: 14px;">This code will expire in 30 minutes. If you didn't request this, please ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="color: #9CA3AF; font-size: 12px;">&copy; 2026 DevCollab. All rights reserved.</p>
         </div>
       `;
 
@@ -88,24 +86,16 @@ exports.verifyEmail = async (req, res, next) => {
     const user = await User.findOne({ verificationToken: req.params.token });
 
     if (!user) {
-      res.status(400);
-      throw new Error('Invalid verification token');
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=invalid_token`);
     }
 
     user.isVerified = true;
     user.verificationToken = undefined;
+    user.verificationOTP = undefined; // Also clear OTP since they verified via link
+    user.verificationOTPExpire = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Email verified successfully!',
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      profileImage: user.profileImage,
-      token: generateToken(user._id),
-    });
+    res.redirect(`${process.env.CLIENT_URL}/login?verified=true`);
   } catch (error) {
     next(error);
   }
@@ -263,12 +253,12 @@ exports.resetPassword = async (req, res, next) => {
 exports.firebaseAuth = async (req, res, next) => {
   try {
     const { firebaseUser } = req; // From middleware
-    
-    let user = await User.findOne({ 
+
+    let user = await User.findOne({
       $or: [
         { firebaseId: firebaseUser.uid },
         { email: firebaseUser.email }
-      ] 
+      ]
     });
 
     if (user) {
