@@ -6,7 +6,6 @@ import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
 import VerifyOtp from './pages/VerifyOtp';
 import OAuthSuccess from './pages/OAuthSuccess';
 import Dashboard from './pages/Dashboard';
@@ -44,7 +43,6 @@ function App() {
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/verify-email/:token" element={<VerifyEmail />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route path="/oauth-success" element={<OAuthSuccess />} />
             <Route path="/about" element={<About />} />

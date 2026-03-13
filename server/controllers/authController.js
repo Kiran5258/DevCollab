@@ -17,7 +17,6 @@ exports.register = async (req, res, next) => {
       throw new Error('User already exists');
     }
 
-    const verificationToken = crypto.randomBytes(20).toString('hex');
     const verificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationOTPExpire = Date.now() + 30 * 60 * 1000; // 30 minutes
 
@@ -25,13 +24,11 @@ exports.register = async (req, res, next) => {
       name,
       email,
       password,
-      verificationToken,
       verificationOTP,
       verificationOTPExpire,
     });
 
     if (user) {
-      const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
       const message = `Your verification code for DevCollab is: ${verificationOTP}`;
       const html = `
@@ -62,7 +59,6 @@ exports.register = async (req, res, next) => {
           email: user.email, // Send back email for OTP screen
         });
       } catch (err) {
-        user.verificationToken = undefined;
         user.verificationOTP = undefined;
         user.verificationOTPExpire = undefined;
         await user.save();
@@ -78,28 +74,6 @@ exports.register = async (req, res, next) => {
   }
 };
 
-// @desc    Verify email
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
-exports.verifyEmail = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ verificationToken: req.params.token });
-
-    if (!user) {
-      return res.redirect(`${process.env.CLIENT_URL}/login?error=invalid_token`);
-    }
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationOTP = undefined; // Also clear OTP since they verified via link
-    user.verificationOTPExpire = undefined;
-    await user.save();
-
-    res.redirect(`${process.env.CLIENT_URL}/login?verified=true`);
-  } catch (error) {
-    next(error);
-  }
-};
 
 // @desc    Verify OTP
 // @route   POST /api/auth/verify-otp
@@ -122,7 +96,6 @@ exports.verifyOTP = async (req, res, next) => {
     user.isVerified = true;
     user.verificationOTP = undefined;
     user.verificationOTPExpire = undefined;
-    user.verificationToken = undefined;
     await user.save();
 
     res.status(200).json({

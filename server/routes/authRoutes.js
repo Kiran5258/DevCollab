@@ -2,7 +2,6 @@ const express = require('express');
 const {
   register,
   login,
-  verifyEmail,
   forgotPassword,
   resetPassword,
   firebaseAuth,
@@ -18,7 +17,6 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 router.post('/firebase', verifyFirebaseToken, firebaseAuth);
-router.get('/verify-email/:token', verifyEmail);
 router.post('/verify-otp', verifyOTP);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', resetPassword);
