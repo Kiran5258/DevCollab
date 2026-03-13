@@ -55,7 +55,7 @@ if (process.env.NODE_ENV === 'production') {
   console.log('Serving static files from:', clientDistPath);
   app.use(express.static(clientDistPath));
 
-  app.get(/^\/(?!api).*/, (req, res) => {
+  app.get('*', (req, res) => {
     res.sendFile(path.join(clientDistPath, 'index.html'));
   });
 } else {
