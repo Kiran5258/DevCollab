@@ -1,25 +1,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyOTP, reset } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
-import API from '../services/api';
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const inputRefs = useRef([]);
   
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
   const email = new URLSearchParams(location.search).get('email');
 
   useEffect(() => {
     if (!email) {
       navigate('/register');
     }
-  }, [email, navigate]);
+
+    if (isSuccess || user) {
+      navigate('/dashboard');
+      dispatch(reset());
+    }
+  }, [email, isSuccess, user, navigate, dispatch]);
 
   const handleChange = (index, value) => {
     if (isNaN(value)) return;
@@ -53,34 +62,17 @@ const VerifyOtp = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     if (e) e.preventDefault();
     const otpString = otp.join('');
-    if (otpString.length !== 6) return;
+    if (otpString.length !== 6 || isLoading) return;
 
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await API.post('/auth/verify-otp', { email, otp: otpString });
-      
-      if (res.data.token) {
-        localStorage.setItem('user', JSON.stringify(res.data));
-        setSuccess(true);
-        setTimeout(() => {
-          navigate('/dashboard');
-          window.location.reload();
-        }, 2000);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Invalid or expired code');
-      setLoading(false);
-    }
+    dispatch(verifyOTP({ email, otp: otpString }));
   };
 
   // Auto submit when all digits are entered
   useEffect(() => {
-    if (otp.join('').length === 6) {
+    if (otp.join('').length === 6 && !isLoading) {
       handleSubmit();
     }
   }, [otp]);
@@ -126,18 +118,18 @@ const VerifyOtp = () => {
               ))}
             </div>
 
-            {error && (
+            {isError && (
               <motion.div 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-2 text-red-500 text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-lg"
               >
                 <AlertCircle size={16} />
-                <span>{error}</span>
+                <span>{message}</span>
               </motion.div>
             )}
 
-            {success ? (
+            {isSuccess ? (
               <div className="flex flex-col items-center justify-center gap-2 py-2 text-green-600 font-bold">
                 <Loader2 className="animate-spin" />
                 <span>Success! Redirecting...</span>
@@ -145,10 +137,10 @@ const VerifyOtp = () => {
             ) : (
               <button
                 type="submit"
-                disabled={loading || otp.join('').length !== 6}
+                disabled={isLoading || otp.join('').length !== 6}
                 className="w-full btn-primary py-4 flex items-center justify-center gap-2 text-lg group"
               >
-                {loading ? (
+                {isLoading ? (
                   <Loader2 className="animate-spin" size={20} />
                 ) : (
                   <>
