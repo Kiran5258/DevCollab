@@ -15,8 +15,6 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [isRegistered, setIsRegistered] = useState(false);
-
   const { name, email, password, confirmPassword } = formData;
 
   const navigate = useNavigate();
@@ -32,11 +30,11 @@ const Register = () => {
     }
 
     if (isSuccess) {
-      setIsRegistered(true);
+      navigate(`/verify-otp?email=${email}`);
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  }, [user, isError, isSuccess, message, navigate, dispatch, email]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -60,30 +58,6 @@ const Register = () => {
       alert(error.message);
     }
   };
-
-  if (isRegistered) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center p-4 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-12 rounded-3xl max-w-lg"
-        >
-          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={48} />
-          </div>
-          <h2 className="text-3xl font-bold mb-4">Check your Email</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-8">
-            We've sent a verification link to <span className="font-bold text-slate-800 dark:text-white">{email}</span>.
-            Please verify your account to continue.
-          </p>
-          <Link to="/login" className="btn-primary inline-block">
-            Go to Login
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">

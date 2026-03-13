@@ -18,35 +18,55 @@ exports.register = async (req, res, next) => {
     }
 
     const verificationToken = crypto.randomBytes(20).toString('hex');
+    const verificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationOTPExpire = Date.now() + 30 * 60 * 1000; // 30 minutes
 
     const user = await User.create({
       name,
       email,
       password,
       verificationToken,
+      verificationOTP,
+      verificationOTPExpire,
     });
 
     if (user) {
       const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
-      const message = `Please verify your email by clicking: ${verificationUrl}`;
-      const html = `<h1>Email Verification</h1><p>Please verify your email by clicking the link below:</p><a href="${verificationUrl}">Verify Email</a>`;
+      const message = `Your verification code is: ${verificationOTP}. Alternatively, you can verify your email by clicking: ${verificationUrl}`;
+      const html = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h1 style="color: #4F46E5; text-align: center;">Verify Your Email</h1>
+          <p>Thank you for joining DevCollab! Use the code below to verify your account:</p>
+          <div style="background: #F3F4F6; padding: 20px; border-radius: 8px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; margin: 20px 0;">
+            ${verificationOTP}
+          </div>
+          <p>Or click the link below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Verify Email</a>
+          </div>
+          <p style="color: #6B7280; font-size: 14px; text-align: center;">This code will expire in 30 minutes.</p>
+        </div>
+      `;
 
       try {
         await sendEmail({
           email: user.email,
           name: user.name,
-          subject: 'DevCollab Email Verification',
+          subject: 'DevCollab Email Verification Code',
           message,
           html,
         });
 
         res.status(201).json({
           success: true,
-          message: 'Registration successful. Please check your email to verify your account.',
+          message: 'Registration successful. Please check your email for the verification code.',
+          email: user.email, // Send back email for OTP screen
         });
       } catch (err) {
         user.verificationToken = undefined;
+        user.verificationOTP = undefined;
+        user.verificationOTPExpire = undefined;
         await user.save();
         res.status(500);
         throw new Error('Email could not be sent');
@@ -73,6 +93,45 @@ exports.verifyEmail = async (req, res, next) => {
     }
 
     user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully!',
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profileImage: user.profileImage,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP
+// @route   POST /api/auth/verify-otp
+// @access  Public
+exports.verifyOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({
+      email,
+      verificationOTP: otp,
+      verificationOTPExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      res.status(400);
+      throw new Error('Invalid or expired OTP');
+    }
+
+    user.isVerified = true;
+    user.verificationOTP = undefined;
+    user.verificationOTPExpire = undefined;
     user.verificationToken = undefined;
     await user.save();
 
