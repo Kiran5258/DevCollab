@@ -24,9 +24,6 @@ exports.getChannels = async (req, res, next) => {
   }
 };
 
-// @desc    Create a new channel
-// @route   POST /api/chats/channels
-// @access  Private
 exports.createChannel = async (req, res, next) => {
   try {
     const { name, description } = req.body;
