@@ -52,5 +52,6 @@ A modern full-stack web application for developers to showcase projects and coll
 
 ## Deployment
 
+- **Live URL:** [https://devcollab-99ud.onrender.com/](https://devcollab-99ud.onrender.com/)
 - **Frontend:** Deploy to Vercel
 - **Backend:** Deploy to Render
