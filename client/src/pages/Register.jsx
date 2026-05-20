@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { register, reset } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, UserPlus, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, CheckCircle, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,8 +24,11 @@ const Register = () => {
     (state) => state.auth
   );
 
+  const [authError, setAuthError] = useState('');
+
   useEffect(() => {
     if (isError) {
+      setAuthError(message);
       console.error(message);
     }
 
@@ -45,8 +48,9 @@ const Register = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setAuthError('');
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setAuthError('Passwords do not match');
       return;
     }
 
@@ -55,7 +59,7 @@ const Register = () => {
       dispatch(register({ name, email, password }));
     } catch (error) {
       console.error('Registration Error:', error);
-      alert(error.message);
+      setAuthError(error.message || 'Registration failed');
     }
   };
 
@@ -71,6 +75,17 @@ const Register = () => {
             <h2 className="text-3xl font-bold mb-2">Create Account</h2>
             <p className="text-slate-600 dark:text-slate-400">Join the DevCollab ecosystem</p>
           </div>
+
+          {authError && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400"
+            >
+              <AlertCircle size={20} />
+              <span className="text-sm font-medium">{authError}</span>
+            </motion.div>
+          )}
 
           <form onSubmit={onSubmit} className="space-y-5">
             <div className="space-y-2">

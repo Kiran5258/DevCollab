@@ -9,7 +9,8 @@ const initialState = {
   message: '',
 };
 
-const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/`;
+const isProduction = import.meta.env.MODE === 'production';
+const API_URL = `${isProduction ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')}/auth/`;
 // Register user
 export const register = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
   try {

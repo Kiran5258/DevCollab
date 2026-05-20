@@ -12,6 +12,14 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Log warning if config is missing at build time
+if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+  console.warn(
+    '⚠️ Firebase Client configuration environment variables (VITE_FIREBASE_*) are missing. ' +
+    'Please configure them in your server environment/Render dashboard for social login to work.'
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;

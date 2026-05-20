@@ -21,9 +21,9 @@ const Explore = () => {
     const fetchProjects = async () => {
       setLoading(true);
       try {
-        const res = await API.get(`/projects?sort=${sortBy}`);
-        setProjects(res.data);
-        setFilteredProjects(res.data);
+        const projectsData = Array.isArray(res.data) ? res.data : [];
+        setProjects(projectsData);
+        setFilteredProjects(projectsData);
       } catch (error) {
         console.error('Error fetching projects:', error);
       } finally {
@@ -34,18 +34,18 @@ const Explore = () => {
   }, [sortBy]);
 
   useEffect(() => {
-    let result = projects;
+    let result = Array.isArray(projects) ? projects : [];
     if (searchTerm) {
       result = result.filter(project => 
-        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (Array.isArray(project.tags) && project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
       );
     }
     if (filter === 'liked') {
-      result = result.filter(project => project.likes?.includes(user?._id));
+      result = result.filter(project => Array.isArray(project.likes) && project.likes.includes(user?._id));
     } else if (filter !== 'all') {
-      result = result.filter(project => project.tags.includes(filter));
+      result = result.filter(project => Array.isArray(project.tags) && project.tags.includes(filter));
     }
     setFilteredProjects(result);
   }, [searchTerm, filter, projects, user?._id]);
@@ -58,9 +58,9 @@ const Explore = () => {
     try {
       const res = await API.put(`/projects/${projectId}/like`);
       setProjects(prevProjects => 
-        prevProjects.map(project => 
-          project._id === projectId ? { ...project, likes: res.data } : project
-        )
+        Array.isArray(prevProjects) ? prevProjects.map(project => 
+          project._id === projectId ? { ...project, likes: Array.isArray(res.data) ? res.data : [] } : project
+        ) : []
       );
     } catch (error) {
       console.error('Error liking project:', error);
@@ -122,7 +122,7 @@ const Explore = () => {
           layout
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {filteredProjects.map((project, index) => (
+          {Array.isArray(filteredProjects) && filteredProjects.map((project, index) => (
             <motion.div
               layout
               initial={{ opacity: 0, y: 20 }}
@@ -167,7 +167,7 @@ const Explore = () => {
 
                 <div className="mt-auto space-y-8">
                   <div className="flex flex-wrap gap-2">
-                    {project.tags?.slice(0, 3).map(tag => (
+                    {Array.isArray(project.tags) && project.tags.slice(0, 3).map(tag => (
                       <span key={tag} className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-indigo-600">
                         {tag}
                       </span>

@@ -78,9 +78,9 @@ const ProjectDetail = () => {
     if (!user) return alert('Please login to like comments');
     try {
       const res = await API.put(`/projects/${id}/comment/${commentId}/like`);
-      const updatedComments = project.comments.map(c => 
-        c._id === commentId ? { ...c, likes: res.data } : c
-      );
+      const updatedComments = Array.isArray(project.comments) ? project.comments.map(c => 
+        c._id === commentId ? { ...c, likes: Array.isArray(res.data) ? res.data : [] } : c
+      ) : [];
       setProject({ ...project, comments: updatedComments });
     } catch (error) {
       console.error('Comment like error:', error);
@@ -93,9 +93,9 @@ const ProjectDetail = () => {
 
     try {
       const res = await API.post(`/projects/${id}/comment/${commentId}/reply`, { text: replyText });
-      const updatedComments = project.comments.map(c => 
-        c._id === commentId ? { ...c, replies: res.data } : c
-      );
+      const updatedComments = Array.isArray(project.comments) ? project.comments.map(c => 
+        c._id === commentId ? { ...c, replies: Array.isArray(res.data) ? res.data : [] } : c
+      ) : [];
       setProject({ ...project, comments: updatedComments });
       setReplyText('');
       setReplyTo(null);
@@ -155,7 +155,7 @@ const ProjectDetail = () => {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                {project.tags?.map(tag => (
+                {Array.isArray(project.tags) && project.tags.map(tag => (
                   <span key={tag} className="px-4 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 rounded-xl text-sm font-bold">
                     {tag}
                   </span>
@@ -207,7 +207,7 @@ const ProjectDetail = () => {
             )}
 
             <div className="space-y-6">
-              {project.comments?.map((c, index) => (
+              {Array.isArray(project.comments) && project.comments.map((c, index) => (
                 <motion.div
                   key={c._id}
                   initial={{ opacity: 0, x: -10 }}
@@ -303,7 +303,7 @@ const ProjectDetail = () => {
                     {/* Nested Replies */}
                     {c.replies?.length > 0 && (
                       <div className="mt-4 space-y-4 pt-4 border-t border-slate-50 dark:border-slate-800">
-                        {c.replies.map(reply => (
+                        {Array.isArray(c.replies) && c.replies.map(reply => (
                           <div key={reply._id} className="flex gap-3">
                             <Avatar src={reply.user?.profileImage} name={reply.user?.name} size="xs" />
                             <div className="flex-1 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl">

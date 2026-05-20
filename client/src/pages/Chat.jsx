@@ -24,9 +24,10 @@ const Chat = () => {
     const fetchChannels = async () => {
       try {
         const res = await API.get('/chats/channels');
-        setChannels(res.data);
-        if (res.data.length > 0 && !activeChannel) {
-          setActiveChannel(res.data[0]);
+        const channelsData = Array.isArray(res.data) ? res.data : [];
+        setChannels(channelsData);
+        if (channelsData.length > 0 && !activeChannel) {
+          setActiveChannel(channelsData[0]);
         }
       } catch (error) {
         console.error('Error fetching channels:', error);
@@ -44,7 +45,7 @@ const Chat = () => {
     const fetchMessages = async () => {
       try {
         const res = await API.get(`/chats/${activeChannel._id}`);
-        setMessages(res.data);
+        setMessages(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
@@ -83,7 +84,7 @@ const Chat = () => {
         name: newChannelName, 
         description: newChannelDesc 
       });
-      setChannels([...channels, res.data]);
+      setChannels(Array.isArray(channels) ? [...channels, res.data] : [res.data]);
       setActiveChannel(res.data);
       setShowCreateModal(false);
       setNewChannelName('');
@@ -116,7 +117,7 @@ const Chat = () => {
           </div>
           
           <div className="flex-1 overflow-y-auto py-4 space-y-1">
-            {channels.map((ch) => (
+            {Array.isArray(channels) && channels.map((ch) => (
               <button
                 key={ch._id}
                 onClick={() => setActiveChannel(ch)}
@@ -215,7 +216,7 @@ const Chat = () => {
                   </motion.div>
 
                   <AnimatePresence initial={false}>
-                    {messages.map((msg, index) => {
+                    {Array.isArray(messages) && messages.map((msg, index) => {
                       const isMe = msg.user?._id === user?._id;
                       return (
                         <motion.div

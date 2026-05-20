@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { login, firebaseLogin, reset } from '../redux/slices/authSlice';
 import { motion } from 'framer-motion';
-import { Mail, Lock, LogIn, Github, Chrome, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Mail, Lock, LogIn, Github, Chrome, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { auth, googleProvider, githubProvider } from '../config/firebase';
 import { signInWithPopup } from 'firebase/auth';
 
@@ -25,12 +25,14 @@ const Login = () => {
 
   const [needsVerification, setNeedsVerification] = useState(false);
   const [justVerified, setJustVerified] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     if (isError) {
       if (message === 'Please verify your email first') {
         setNeedsVerification(true);
       }
+      setAuthError(message);
       console.error(message);
     }
 
@@ -85,21 +87,24 @@ const Login = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setAuthError('');
     try {
       dispatch(login({ email, password }));
     } catch (error) {
       console.error('Login Error:', error);
-      alert(error.message);
+      setAuthError(error.message || 'Login failed');
     }
   };
 
   const handleSocialLogin = async (provider) => {
+    setAuthError('');
     try {
       const result = await signInWithPopup(auth, provider);
       const token = await result.user.getIdToken();
       dispatch(firebaseLogin(token));
     } catch (error) {
       console.error('Firebase Auth Error:', error);
+      setAuthError(error.message || 'Social login failed');
     }
   };
 
@@ -125,6 +130,17 @@ const Login = () => {
             >
               <CheckCircle size={20} />
               <span className="text-sm font-medium">Email verified successfully! You can now log in.</span>
+            </motion.div>
+          )}
+
+          {authError && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400"
+            >
+              <AlertCircle size={20} />
+              <span className="text-sm font-medium">{authError}</span>
             </motion.div>
           )}
 

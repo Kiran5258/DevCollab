@@ -50,10 +50,11 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const profileRes = await API.get('/users/profile');
-        setSavedProjects(profileRes.data.savedProjects || []);
+        setSavedProjects(Array.isArray(profileRes.data.savedProjects) ? profileRes.data.savedProjects.filter(Boolean) : []);
 
         const projectsRes = await API.get('/projects');
-        const myProjects = projectsRes.data.filter(p => p.createdBy._id === user._id);
+        const projectsData = Array.isArray(projectsRes.data) ? projectsRes.data : [];
+        const myProjects = projectsData.filter(p => p.createdBy && (p.createdBy._id === user._id || p.createdBy === user._id));
         setProjects(myProjects);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -163,7 +164,7 @@ const Dashboard = () => {
           ) : activeTab === 'projects' ? (
             projects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.map(project => (
+                {Array.isArray(projects) && projects.map(project => (
                   <ProjectCard key={project._id} project={project} isOwner={true} />
                 ))}
                 <Link to="/create-project" className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all group">
@@ -182,7 +183,7 @@ const Dashboard = () => {
           ) : activeTab === 'saved' ? (
             savedProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {savedProjects.map(project => (
+                {Array.isArray(savedProjects) && savedProjects.map(project => (
                   <ProjectCard key={project._id} project={project} isOwner={false} />
                 ))}
               </div>
@@ -413,7 +414,7 @@ const ProjectCard = ({ project, isOwner }) => {
         </p>
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex flex-wrap gap-2">
-            {project.tags?.slice(0, 2).map(tag => (
+            {Array.isArray(project.tags) && project.tags.slice(0, 2).map(tag => (
               <span key={tag} className="text-[10px] uppercase font-black tracking-widest px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-500 border border-slate-100 dark:border-white/5">
                 {tag}
               </span>

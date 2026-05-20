@@ -16,7 +16,7 @@ const Profile = () => {
       try {
         const res = await API.get(`/users/${id}`);
         setProfile(res.data.user);
-        setProjects(res.data.projects);
+        setProjects(Array.isArray(res.data.projects) ? res.data.projects : []);
       } catch (error) {
         console.error('Error fetching profile:', error);
       } finally {
@@ -78,7 +78,7 @@ const Profile = () => {
             <div className="space-y-4 mb-8">
               <h3 className="font-bold text-sm uppercase tracking-wider text-slate-400">Skills</h3>
               <div className="flex flex-wrap gap-2">
-                {profile.skills?.length > 0 ? profile.skills.map(skill => (
+                {Array.isArray(profile.skills) && profile.skills.length > 0 ? profile.skills.map(skill => (
                   <span key={skill} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm font-medium">
                     {skill}
                   </span>
@@ -127,7 +127,7 @@ const Profile = () => {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold px-2">Projects ({projects.length})</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map((project) => (
+              {Array.isArray(projects) && projects.map((project) => (
                 <motion.div
                   whileHover={{ y: -5 }}
                   key={project._id}

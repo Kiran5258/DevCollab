@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 if (admin.apps.length === 0) {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   console.log('Checking Firebase Config:');
   console.log('- Project ID:', projectId ? 'Found' : 'MISSING');
@@ -13,11 +13,20 @@ if (admin.apps.length === 0) {
 
   if (projectId && clientEmail && privateKey) {
     try {
+      // Clean private key from potential outer quotes
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        privateKey = privateKey.slice(1, -1);
+      }
+      if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+        privateKey = privateKey.slice(1, -1);
+      }
+      privateKey = privateKey.replace(/\\n/g, '\n');
+
       admin.initializeApp({
         credential: admin.credential.cert({
           projectId,
           clientEmail,
-          privateKey: privateKey.replace(/\\n/g, '\n'),
+          privateKey,
         }),
       });
       console.log('✅ Firebase Admin initialized successfully');
