@@ -13,11 +13,11 @@ services:
       - key: SERVER_URL
         value: https://devcollab-99ud.onrender.com
       - key: VITE_API_URL
-        value: https://devcollab-app.onrender.com/api
+        value: https://devcollab-99ud.onrender.com/api
       - key: GOOGLE_CALLBACK_URL
-        value: https://devcollab-app.onrender.com/api/auth/google/callback
+        value: https://devcollab-99ud.onrender.com/api/auth/google/callback
       - key: GITHUB_CALLBACK_URL
-        value: https://devcollab-app.onrender.com/api/auth/github/callback
+        value: https://devcollab-99ud.onrender.com/api/auth/github/callback
       # Secrets should be set in the Render Dashboard
       - key: MONGODB_URI
         sync: false
